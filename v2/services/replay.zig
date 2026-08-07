@@ -154,7 +154,7 @@ pub fn serviceMain(runner: lib.runner.Connection, _: ReadOnly, rw: ReadWrite) !n
     );
 
     const notification = consensus_sender.next() orelse unreachable;
-    notification.* = consensus.ReplayNotifications.Notification.rootInitialized(root_block);
+    notification.* = root_block;
     consensus_sender.markUsed();
 
     // After the slot is supposedly populated, start shred recv (eventually Repair service) on it.
@@ -185,7 +185,7 @@ pub fn serviceMain(runner: lib.runner.Connection, _: ReadOnly, rw: ReadWrite) !n
 
             logger.info().logf(
                 "consensus finalized slot {f} ({})",
-                .{ rw.block_pool.indexToPtr(finalized.block).slot, finalized.block },
+                .{ rw.block_pool.indexToPtr(finalized.*).slot, finalized.* },
             );
 
             continue :task .idle;
@@ -307,7 +307,7 @@ fn sendBlockCompletionToConsensus(
     sender: anytype,
 ) void {
     const notification = sender.next() orelse unreachable;
-    notification.* = consensus.ReplayNotifications.Notification.blockExecuted(block_ref);
+    notification.* = block_ref;
     sender.markUsed();
 }
 
@@ -1635,7 +1635,7 @@ test "BlockExecState finishes zero-transaction block after all transactions are 
     try std.testing.expect(state.finished());
 }
 
-test "replay sends root execution and consumes finalized block notifications" {
+test "replay sends root and executed block refs and consumes finalized block notifications" {
     const root_block = api.BlockRef.fromInt(4);
     const completed_block = api.BlockRef.fromInt(5);
     const finalized_block = api.BlockRef.fromInt(6);
@@ -1645,29 +1645,27 @@ test "replay sends root execution and consumes finalized block notifications" {
     var consensus_sender = notifications.in.get(.writer);
 
     const root_notification = consensus_sender.next().?;
-    root_notification.* = consensus.ReplayNotifications.Notification.rootInitialized(root_block);
+    root_notification.* = root_block;
     consensus_sender.markUsed();
 
     var consensus_input_reader = notifications.in.get(.reader);
     const root_event = consensus_input_reader.next().?;
-    try std.testing.expectEqual(consensus.ReplayNotifications.Notification.Kind.root_initialized, root_event.kind);
-    try std.testing.expectEqual(root_block, root_event.data.root_initialized.block);
+    try std.testing.expectEqual(root_block, root_event.*);
     consensus_input_reader.markUsed();
 
     sendBlockCompletionToConsensus(completed_block, &consensus_sender);
 
     const completion_event = consensus_input_reader.next().?;
-    try std.testing.expectEqual(consensus.ReplayNotifications.Notification.Kind.block_executed, completion_event.kind);
-    try std.testing.expectEqual(completed_block, completion_event.data.block_executed.block);
+    try std.testing.expectEqual(completed_block, completion_event.*);
     consensus_input_reader.markUsed();
 
     var consensus_output_sender = notifications.out.get(.writer);
-    consensus_output_sender.next().?.* = consensus.ReplayNotifications.Finalized.init(finalized_block);
+    consensus_output_sender.next().?.* = finalized_block;
     consensus_output_sender.markUsed();
 
     var replay_finalized_receiver = notifications.out.get(.reader);
     const finalized = replay_finalized_receiver.next().?;
-    try std.testing.expectEqual(finalized_block, finalized.block);
+    try std.testing.expectEqual(finalized_block, finalized.*);
     replay_finalized_receiver.markUsed();
 }
 
@@ -1681,8 +1679,7 @@ test "replay sends successful block completion notification" {
 
     var reader = notifications.in.get(.reader);
     const event = reader.next().?;
-    try std.testing.expectEqual(consensus.ReplayNotifications.Notification.Kind.block_executed, event.kind);
-    try std.testing.expectEqual(block_ref, event.data.block_executed.block);
+    try std.testing.expectEqual(block_ref, event.*);
 }
 
 test "replay consumes finalized block notifications" {
@@ -1690,17 +1687,17 @@ test "replay consumes finalized block notifications" {
     notifications.init();
 
     var receiver = notifications.out.get(.reader);
-    try std.testing.expectEqual(@as(?*const consensus.ReplayNotifications.Finalized, null), receiver.peek());
+    try std.testing.expectEqual(@as(?*const api.BlockRef, null), receiver.peek());
 
     const block_ref = api.BlockRef.fromInt(11);
     var sender = notifications.out.get(.writer);
-    sender.next().?.* = consensus.ReplayNotifications.Finalized.init(block_ref);
+    sender.next().?.* = block_ref;
     sender.markUsed();
 
     const finalized = receiver.next().?;
-    try std.testing.expectEqual(block_ref, finalized.block);
+    try std.testing.expectEqual(block_ref, finalized.*);
     receiver.markUsed();
-    try std.testing.expectEqual(@as(?*const consensus.ReplayNotifications.Finalized, null), receiver.peek());
+    try std.testing.expectEqual(@as(?*const api.BlockRef, null), receiver.peek());
 }
 
 test "MerkleForest tree put" {
