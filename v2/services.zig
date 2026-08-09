@@ -95,6 +95,7 @@ pub const consensus = struct {
 
     pub const ReadWrite = struct {
         replay_notifications: *consensus_api.ReplayNotifications,
+        tel: *lib.telemetry.Region,
     };
 };
 

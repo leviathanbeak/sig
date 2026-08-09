@@ -359,7 +359,10 @@ pub fn main() !void {
         },
         .consensus = .{
             .ro = .{ .block_pool = block_pool.finish() },
-            .rw = .{ .replay_notifications = replay_notifications.finish() },
+            .rw = .{
+                .replay_notifications = replay_notifications.finish(),
+                .tel = telemetry_region.finish(),
+            },
         },
         .snapshot = .{
             .ro = .{ .config = snapshot_config.finish() },
