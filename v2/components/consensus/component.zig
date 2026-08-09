@@ -72,7 +72,8 @@ pub const ConsensusState = struct {
 
         while (curr != self.current_anchor) {
             const parent = curr.constPtr(self.block_pool).parent.opt() orelse return null;
-            if (parent != self.current_anchor and !self.confirmed.isSet(parent.index())) return null;
+            if (parent != self.current_anchor and
+                !self.confirmed.isSet(parent.index())) return null;
 
             curr = parent;
             depth += 1;

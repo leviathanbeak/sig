@@ -1625,7 +1625,7 @@ test "services.replay: BlockExecState observes failed execution result" {
     try std.testing.expect(state.finished());
 }
 
-test "services.replay: BlockExecState finishes zero-transaction block after all transactions are requested" {
+test "services.replay: BlockExecState finishes zero-transaction block" {
     var state: BlockExecState = .default;
 
     try std.testing.expect(!state.finished());
@@ -1635,7 +1635,7 @@ test "services.replay: BlockExecState finishes zero-transaction block after all 
     try std.testing.expect(state.finished());
 }
 
-test "services.replay: sends root and executed block refs and consumes finalized block notifications" {
+test "services.replay: sends root execution and consumes finalization" {
     const root_block = api.BlockRef.fromInt(4);
     const completed_block = api.BlockRef.fromInt(5);
     const finalized_block = api.BlockRef.fromInt(6);
