@@ -8,13 +8,11 @@ pub const ReplayNotifications = extern struct {
     /// Replay -> consensus.
     ///
     /// Replay writes the root block first, then successfully executed blocks.
-    /// Consensus reads this ring.
     in: lib.ipc.Ring(BlockPool.capacity, BlockRef),
 
     /// Consensus -> replay.
     ///
     /// Consensus writes finalized blocks here.
-    /// Replay reads this ring.
     out: lib.ipc.Ring(BlockPool.capacity, BlockRef),
 
     pub fn init(self: *ReplayNotifications) void {
