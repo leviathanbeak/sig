@@ -150,7 +150,7 @@ fn setParentForConsensusTest(
     }
 }
 
-test "initializes root as confirmed anchor" {
+test "consensus.component: initializes root as confirmed anchor" {
     var pool_buf: [api.BlockPool.size()]u8 align(@alignOf(api.BlockPool)) = undefined;
     const block_pool = blockPoolForConsensusTest(&pool_buf);
 
@@ -162,7 +162,7 @@ test "initializes root as confirmed anchor" {
     try std.testing.expect(state.confirmed.isSet(root.index()));
 }
 
-test "does not finalize at finalization depth" {
+test "consensus.component: does not finalize at finalization depth" {
     var pool_buf: [api.BlockPool.size()]u8 align(@alignOf(api.BlockPool)) = undefined;
     const block_pool = blockPoolForConsensusTest(&pool_buf);
 
@@ -182,7 +182,7 @@ test "does not finalize at finalization depth" {
     try std.testing.expectEqual(root, state.current_anchor);
 }
 
-test "finalizes first block after finalization depth" {
+test "consensus.component: finalizes first block after finalization depth" {
     var pool_buf: [api.BlockPool.size()]u8 align(@alignOf(api.BlockPool)) = undefined;
     const block_pool = blockPoolForConsensusTest(&pool_buf);
 
@@ -205,7 +205,7 @@ test "finalizes first block after finalization depth" {
     try std.testing.expectEqual(a, state.current_anchor);
 }
 
-test "linear finalization advances repeatedly" {
+test "consensus.component: linear finalization advances repeatedly" {
     var pool_buf: [api.BlockPool.size()]u8 align(@alignOf(api.BlockPool)) = undefined;
     const block_pool = blockPoolForConsensusTest(&pool_buf);
 
@@ -231,7 +231,7 @@ test "linear finalization advances repeatedly" {
     try std.testing.expectEqual(b, state.current_anchor);
 }
 
-test "confirmed child becomes finalizable when missing parent arrives" {
+test "consensus.component: confirmed child becomes finalizable when missing parent arrives" {
     var pool_buf: [api.BlockPool.size()]u8 align(@alignOf(api.BlockPool)) = undefined;
     const block_pool = blockPoolForConsensusTest(&pool_buf);
 
@@ -254,7 +254,7 @@ test "confirmed child becomes finalizable when missing parent arrives" {
     try std.testing.expectEqual(a, state.current_anchor);
 }
 
-test "competing fork must exceed finalization depth" {
+test "consensus.component: competing fork must exceed finalization depth" {
     var pool_buf: [api.BlockPool.size()]u8 align(@alignOf(api.BlockPool)) = undefined;
     const block_pool = blockPoolForConsensusTest(&pool_buf);
 

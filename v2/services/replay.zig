@@ -1598,7 +1598,7 @@ const MerkleForest = struct {
     }
 };
 
-test "BlockExecState observes successful execution result" {
+test "services.replay: BlockExecState observes successful execution result" {
     var state: BlockExecState = .{ .n_transactions_requested = 1 };
 
     try std.testing.expect(!state.finished());
@@ -1613,7 +1613,7 @@ test "BlockExecState observes successful execution result" {
     try std.testing.expect(state.finished());
 }
 
-test "BlockExecState observes failed execution result" {
+test "services.replay: BlockExecState observes failed execution result" {
     var state: BlockExecState = .{ .n_transactions_requested = 2 };
 
     state.observeExecutionResult(true);
@@ -1625,7 +1625,7 @@ test "BlockExecState observes failed execution result" {
     try std.testing.expect(state.finished());
 }
 
-test "BlockExecState finishes zero-transaction block after all transactions are requested" {
+test "services.replay: BlockExecState finishes zero-transaction block after all transactions are requested" {
     var state: BlockExecState = .default;
 
     try std.testing.expect(!state.finished());
@@ -1635,7 +1635,7 @@ test "BlockExecState finishes zero-transaction block after all transactions are 
     try std.testing.expect(state.finished());
 }
 
-test "replay sends root and executed block refs and consumes finalized block notifications" {
+test "services.replay: sends root and executed block refs and consumes finalized block notifications" {
     const root_block = api.BlockRef.fromInt(4);
     const completed_block = api.BlockRef.fromInt(5);
     const finalized_block = api.BlockRef.fromInt(6);
@@ -1669,7 +1669,7 @@ test "replay sends root and executed block refs and consumes finalized block not
     replay_finalized_receiver.markUsed();
 }
 
-test "replay sends successful block completion notification" {
+test "services.replay: sends successful block completion notification" {
     const block_ref = api.BlockRef.fromInt(7);
 
     var notifications: consensus.ReplayNotifications = undefined;
@@ -1682,7 +1682,7 @@ test "replay sends successful block completion notification" {
     try std.testing.expectEqual(block_ref, event.*);
 }
 
-test "replay consumes finalized block notifications" {
+test "services.replay: consumes finalized block notifications" {
     var notifications: consensus.ReplayNotifications = undefined;
     notifications.init();
 
